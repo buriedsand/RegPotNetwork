@@ -1,0 +1,10 @@
+# Environments
+.conda/
+.snakemake/
+
+# Data
+data/
+.DS_Store
+
+# Compiled files
+src/cpp/peak_rp
