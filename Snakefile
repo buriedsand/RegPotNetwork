@@ -10,6 +10,11 @@ rule all:
         # expand("data/output/tf_peak_rp/{tf}.txt", tf=TF_LIST),
         # "data/output/chrom_rp.txt"
 
+rule compile_cpp:
+    input: "src/cpp/peak_rp.cpp"
+    output: "src/cpp/peak_rp"
+    shell: "g++ -o {output} {input} -O3 -std=c++17"
+
 rule download_tf_chipseq_data:
     output:
         temp("data/tf_chipseq/{tf}.bed")
