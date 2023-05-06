@@ -1,7 +1,6 @@
 with open("assets/factors.txt", "r") as f:
     lines = [line.strip() for line in f]
     TF_LIST = [line.split(",")[0] for line in lines]
-    TF_LIST = TF_LIST[:3]
 
 # Define the target rule
 rule all:
