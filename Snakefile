@@ -13,7 +13,7 @@ rule all:
 rule compile_cpp:
     input: "src/cpp/peak_rp.cpp"
     output: "src/cpp/peak_rp"
-    shell: "g++ -o {output} {input} -O3 -std=c++17"
+    shell: "g++ -o {output} {input} -O3 -std=c++17 -pthread"
 
 rule download_tf_chipseq_data:
     output:
