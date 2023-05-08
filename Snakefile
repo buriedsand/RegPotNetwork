@@ -4,7 +4,7 @@ include: "uterine.smk"
 
 with open("assets/factors.txt", "r") as f:
     lines = [line.strip() for line in f]
-    TF_LIST = [line.split(",")[0] for line in lines][:3]
+    TF_LIST = [line.split(",")[0] for line in lines]
 
 # Define the target rule
 rule all:
@@ -41,11 +41,11 @@ rule preprocess_tf_chipseq_data:
 rule intersect_tf_chipseq_h3k27ac:
     input:
         h3k27ac="inputs/h3k27ac_consensus/{group}.bed",
-        tf_chipseq="data/tmp/tf_chipseq_filtered/{tf}.bed"
+        tf_chipseq="data/tf_chipseq_filtered/{tf}.bed"
     output:
         temp("data/tmp/tf_chipseq_intersect/{group}/{tf}.bed")
     shell:
-        "bedtools intersect -a {input.tf_chipseq} -b {input.h3k27ac} > {output}"
+        "bedtools intersect -a {input.tf_chipseq} -b {input.h3k27ac} -wa -sorted > {output}"
 
 rule merge_tf_chipseq_intersect:
     input:
@@ -57,7 +57,7 @@ rule merge_tf_chipseq_intersect:
 
 rule binarize_chipseq_binding:
     input:
-        "data/tmp/tf_chipseq_merged/{group}/{tf}_merged.bed"
+        "data/tmp/tf_chipseq_merged/{group}/{tf}.bed"
     output:
         "data/tmp/tf_chipseq_binarized/{group}/{tf}_binarized.bed"
     shell:
