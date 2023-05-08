@@ -4,7 +4,11 @@
 
 # Data
 data/
+inputs/
 .DS_Store
+
+# Mumerge
+mumerge/
 
 # Compiled files
 src/cpp/peak_rp

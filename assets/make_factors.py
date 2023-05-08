@@ -7,8 +7,8 @@ html_string = """
 option_values = re.findall(r'(?<=value=").*?(?=")', html_string)[1:]
 parenthesis_numbers = re.findall(r"(?<=\()\d+(?=\))", html_string)
 
-# print("Option values:", len(option_values))
-# print("Numbers in parentheses:", len(parenthesis_numbers))
+print("Option values:", len(option_values))
+print("Numbers in parentheses:", len(parenthesis_numbers))
 
 with open("assets/factors.txt", "w") as f:
     for value, number in zip(option_values, parenthesis_numbers):

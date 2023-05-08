@@ -1,6 +1,10 @@
+# Main Snakefile
+
+include: "uterine.smk"
+
 with open("assets/factors.txt", "r") as f:
     lines = [line.strip() for line in f]
-    TF_LIST = [line.split(",")[0] for line in lines]
+    TF_LIST = [line.split(",")[0] for line in lines][:3]
 
 # Define the target rule
 rule all:
@@ -49,14 +53,6 @@ rule preprocess_tf_chipseq_data:
 #     shell:
 #         "python src/python/calculate_peak_rp.py {input} {output}"
 
-# rule calculate_average_h3k27ac_signal:
-#     input:
-#         "data/tmp/h3k27ac_consensus.bed"
-#     output:
-#         "data/tmp/h3k27ac_average_signal.bed"
-#     shell:
-#         "python src/python/calculate_average_signal.py {input} {output}"
-
 # rule calculate_chrom_rp:
 #     input:
 #         "data/tmp/h3k27ac_average_signal.bed"
@@ -64,28 +60,3 @@ rule preprocess_tf_chipseq_data:
 #         "data/output/chrom_rp.txt"
 #     shell:
 #         "python src/python/calculate_chrom_rp.py {input} {output}"
-
-
-###
-
-# rule download_h3k27ac_data:
-#     output:
-#         "data/tmp/h3k27ac_data.bed"
-#     shell:
-#         "wget -O {output} <URL>"
-
-# rule preprocess_h3k27ac_data:
-#     input:
-#         "data/tmp/h3k27ac_data.bed"
-#     output:
-#         "data/tmp/h3k27ac_filtered.bed"
-#     shell:
-#         "python src/python/filter_problematic_regions.py {input} {output}"
-
-# rule merge_h3k27ac_peaks:
-#     input:
-#         "data/tmp/h3k27ac_filtered.bed"
-#     output:
-#         "data/tmp/h3k27ac_consensus.bed"
-#     shell:
-#         "python src/python/merge_peaks.py {input} {output}"

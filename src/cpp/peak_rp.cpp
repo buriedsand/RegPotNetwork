@@ -14,11 +14,13 @@ const int L = 100000;
 const int delta = 10000;
 const double mu = -std::log(static_cast<double>(L) / (3 * delta));
 
-double calculate_single_gene_rp(const std::vector<std::tuple<int, int, double>> &sample_values, double t_k) {
+double calculate_single_gene_rp(const std::vector<std::tuple<int, int, double>> &sample_values, int t_k) {
     double R_jk = 0;
     for (const auto &[start, end, s_ij] : sample_values) {
-        for (int i = start; i < end; ++i) {
-            double d = std::abs(i - t_k) / L;
+        int adjusted_start = std::max(start, t_k - L);
+        int adjusted_end = std::min(end, t_k + L);
+        for (int i = adjusted_start; i < adjusted_end; ++i) {
+            double d = std::abs(i - t_k) / static_cast<double>(L);
             double exp_neg_mu_d = std::exp(-mu * d);
             double w_i = 2 * exp_neg_mu_d / (1 + exp_neg_mu_d);
             R_jk += w_i * s_ij;
@@ -38,23 +40,24 @@ int main(int argc, char *argv[]) {
     const char *output_file = argv[2];
     const char *refseq_file = argv[3];
 
-    // Read binary values
-    io::CSVReader<4, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> binary_values_reader(input_file);
+    // Read signal values (e.g., binarized TF binding, H3K27ac signal)
+    io::CSVReader<4, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> signal_values_reader(input_file);
 
     std::string chr;
-    double start, end, s_ij;
-    std::unordered_map<std::string, std::vector<std::tuple<int, int, double>>> binary_values;
+    int start, end;
+    double s_ij;
+    std::unordered_map<std::string, std::vector<std::tuple<int, int, double>>> signal_values;
 
-    while (binary_values_reader.read_row(chr, start, end, s_ij)) {
-        binary_values[chr].push_back({static_cast<int>(start), static_cast<int>(end), s_ij});
+    while (signal_values_reader.read_row(chr, start, end, s_ij)) {
+        signal_values[chr].push_back({start, end, s_ij});
     }
 
     // Read refseq genes
     io::CSVReader<4, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> refseq_genes_reader(refseq_file);
 
     std::string gene_id, strand;
-    double tss;
-    std::vector<std::tuple<std::string, std::string, double>> refseq_genes;
+    int tss;
+    std::vector<std::tuple<std::string, std::string, int>> refseq_genes;
 
     while (refseq_genes_reader.read_row(gene_id, chr, strand, tss)) {
         refseq_genes.push_back({gene_id, chr, tss});
@@ -65,11 +68,11 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, double> peak_rp;
 
     for (const auto &[gene_id, gene_chr, t_k] : refseq_genes) {
-        double interval_start = std::max(t_k - L, 0.0);
-        double interval_end = t_k + L;
+        int interval_start = std::max(t_k - L, 0);
+        int interval_end = t_k + L;
 
         std::vector<std::tuple<int, int, double>> interval_values;
-        for (const auto &row : binary_values[gene_chr]) {
+        for (const auto &row : signal_values[gene_chr]) {
             int start, end;
             double s_ij;
             std::tie(start, end, s_ij) = row;
