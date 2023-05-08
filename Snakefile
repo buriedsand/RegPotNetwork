@@ -9,7 +9,8 @@ with open("assets/factors.txt", "r") as f:
 # Define the target rule
 rule all:
     input:
-        expand("data/tf_chipseq_filtered/{tf}.bed", tf=TF_LIST)
+        expand("data/tmp/tf_chipseq_binarized/M/{tf}_binarized.bed", tf=TF_LIST),
+        expand("data/tmp/tf_chipseq_binarized/L/{tf}_binarized.bed", tf=TF_LIST)
         # expand("data/output/tf_peak_rp/{tf}.txt", tf=TF_LIST),
         # "data/output/chrom_rp.txt"
 
