@@ -36,14 +36,32 @@ rule preprocess_tf_chipseq_data:
     shell:
         "bedtools intersect -a {input} -b {params.blacklist} -v -wa -sorted > {output}"
 
-# rule intersect_tf_chipseq_h3k27ac:
-#     input:
-#         h3k27ac="data/tmp/h3k27ac_consensus.bed",
-#         tf_chipseq="data/tmp/tf_chipseq_filtered/{tf}.bed"
-#     output:
-#         "data/tmp/tf_chipseq_intersect/{tf}.bed"
-#     shell:
-#         "bedtools intersect -a {input.tf_chipseq} -b {input.h3k27ac} > {output}"
+## Process 2 groups
+rule intersect_tf_chipseq_h3k27ac:
+    input:
+        h3k27ac="inputs/h3k27ac_consensus/{group}.bed",
+        tf_chipseq="data/tmp/tf_chipseq_filtered/{tf}.bed"
+    output:
+        temp("data/tmp/tf_chipseq_intersect/{group}/{tf}.bed")
+    shell:
+        "bedtools intersect -a {input.tf_chipseq} -b {input.h3k27ac} > {output}"
+
+rule merge_tf_chipseq_intersect:
+    input:
+        "data/tmp/tf_chipseq_intersect/{group}/{tf}.bed"
+    output:
+        temp("data/tmp/tf_chipseq_merged/{group}/{tf}.bed")
+    shell:
+        "bedtools merge -i {input} > {output}"
+
+rule binarize_chipseq_binding:
+    input:
+        "data/tmp/tf_chipseq_merged/{group}/{tf}_merged.bed"
+    output:
+        "data/tmp/tf_chipseq_binarized/{group}/{tf}_binarized.bed"
+    shell:
+        "awk 'BEGIN {{FS=OFS=\"\t\"}} !seen[$1, $2, $3]++ {{print $1, $2, $3, 1}}' {input} > {output}"
+
 
 # rule calculate_peak_rp:
 #     input:
