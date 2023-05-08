@@ -1,12 +1,21 @@
-import sys
+import os
 import pandas as pd
 
-input_file = sys.argv[1]
-output_file = sys.argv[2]
+ASSEMBLY = "hg19"
+
+url = (
+    f"https://hgdownload.soe.ucsc.edu/goldenPath/{ASSEMBLY}/database/ncbiRefSeq.txt.gz"
+)
+refseq_file = f"assets/refseq_genes/{ASSEMBLY}_refseq_genes.txt.gz"
+
+os.makedirs(os.path.dirname(refseq_file), exist_ok=True)
+os.system(f"wget -O {refseq_file} {url}")
+
+output_file = f"assets/refseq_genes/{ASSEMBLY}_refseq_genes.tsv"
 
 # Read the input file
 df = pd.read_csv(
-    input_file,
+    refseq_file,
     sep="\t",
     header=None,
     names=[
@@ -47,3 +56,5 @@ df = df.drop_duplicates(subset="name2", keep="first")
 df[["name2", "chr", "strand", "tss"]].to_csv(
     output_file, sep="\t", header=None, index=False
 )
+
+os.system(f"rm {refseq_file}")

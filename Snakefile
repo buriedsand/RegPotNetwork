@@ -4,15 +4,13 @@ include: "uterine.smk"
 
 with open("assets/factors.txt", "r") as f:
     lines = [line.strip() for line in f]
-    TF_LIST = [line.split(",")[0] for line in lines]
+    TF_LIST = [line.split(",")[0] for line in lines][:3]
 
 # Define the target rule
 rule all:
     input:
-        expand("data/tmp/tf_chipseq_binarized/M/{tf}_binarized.bed", tf=TF_LIST),
-        expand("data/tmp/tf_chipseq_binarized/L/{tf}_binarized.bed", tf=TF_LIST)
-        # expand("data/output/tf_peak_rp/{tf}.txt", tf=TF_LIST),
-        # "data/output/chrom_rp.txt"
+        expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
+        expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L"))
 
 rule compile_cpp:
     input: "src/cpp/peak_rp.cpp"
@@ -59,23 +57,33 @@ rule binarize_chipseq_binding:
     input:
         "data/tmp/tf_chipseq_merged/{group}/{tf}.bed"
     output:
-        "data/tmp/tf_chipseq_binarized/{group}/{tf}_binarized.bed"
+        "data/tmp/tf_chipseq_binarized/{group}/{tf}.bed"
     shell:
         "awk 'BEGIN {{FS=OFS=\"\t\"}} !seen[$1, $2, $3]++ {{print $1, $2, $3, 1}}' {input} > {output}"
 
 
-# rule calculate_peak_rp:
-#     input:
-#         "data/tmp/tf_chipseq_intersect/{tf}.bed"
-#     output:
-#         "data/output/tf_peak_rp/{tf}.txt"
-#     shell:
-#         "python src/python/calculate_peak_rp.py {input} {output}"
+rule calculate_peak_rp:
+    input:
+        "data/tmp/tf_chipseq_binarized/{group}/{tf}.bed"
+    output:
+        "data/tmp/tf_peak_rp/{group}/{tf}.csv"
+    params:
+        refseq_genes="assets/refseq_genes/hg19_refseq_genes.tsv"
+    shell:
+        "src/cpp/peak_rp {input} {output} {params.refseq_genes}"
 
-# rule calculate_chrom_rp:
-#     input:
-#         "data/tmp/h3k27ac_average_signal.bed"
-#     output:
-#         "data/output/chrom_rp.txt"
-#     shell:
-#         "python src/python/calculate_chrom_rp.py {input} {output}"
+rule aggregate_peak_rp:
+    input:
+        lambda wildcards: expand(f"data/tmp/tf_peak_rp/{wildcards.group}/{{tf}}.csv", tf=TF_LIST)
+    output: "data/tmp/outputs/{group}/peak_rp.csv"
+    shell: "python src/python/aggregate_files.py {input} {output}"
+
+rule calculate_chrom_rp:
+    input:
+        "inputs/h3k27ac_average_signal/{group}.bed"
+    output:
+        "data/tmp/outputs/{group}/chrom_rp.csv"
+    params:
+        refseq_genes="assets/refseq_genes/hg19_refseq_genes.tsv"
+    shell:
+        "src/cpp/peak_rp {input} {output} {params.refseq_genes}"

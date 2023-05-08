@@ -1,20 +1,18 @@
 import sys
 import pandas as pd
-import glob
+from pathlib import Path
 
-prefix = sys.argv[1]
-suffix = sys.argv[2]
-output_file = sys.argv[3]
+input_files = sys.argv[1:-1]
+output_file = sys.argv[-1]
 
-# Get a list of all the CSV files in the current directory
-csv_files = glob.glob(f"{prefix}*.{suffix}")
 
 # Initialize an empty DataFrame
 result = pd.DataFrame()
 
 # Iterate over the CSV files
-for file in csv_files:
-    factor_name = file.split(prefix)[1].split(suffix)[0].replace(".", "")
+for file in input_files:
+    factor_name = Path(file).stem
+
     # Read the CSV file into a DataFrame
     df = pd.read_csv(file, header=None, names=["Gene", factor_name])
 
@@ -29,6 +27,12 @@ result = result.sort_values(by="Gene")
 
 # Reset the index and drop the old index
 result = result.reset_index(drop=True)
+
+# Set the index as the "Gene" column
+result = result.set_index("Gene")
+
+# Sort columns alphabetically
+result = result.sort_index(axis=1)
 
 # Save the aggregated DataFrame to a new CSV file
 result.to_csv(output_file, index=False)
