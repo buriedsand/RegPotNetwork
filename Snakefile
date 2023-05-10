@@ -11,7 +11,7 @@ rule all:
     input:
         # expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
         # expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L"))
-        expand("data/target_sets/{distance}k/{tf}.tsv", distance=(1, 5, 10), tf=TF_LIST)
+        expand("data/unweighted_network/{distance}k/ugrn.csv", distance=(1, 5, 10))
 
 rule compile_cpp:
     input: "src/cpp/peak_rp.cpp"
@@ -20,11 +20,20 @@ rule compile_cpp:
 
 rule download_target_sets:
     output:
-        "data/target_sets/{distance}k/{tf}.tsv"
+        temp("data/target_sets/{distance}k/{tf}.tsv")
     params: 
         url="https://chip-atlas.dbcls.jp/data/hg19/target/{tf}.{distance}.tsv"
     shell:
         "wget -O {output} {params.url} || touch {output}"
+
+rule aggregate_target_sets:
+    input:
+        lambda wildcards: expand(f"data/target_sets/{wildcards.distance}k/{{tf}}.tsv", tf=TF_LIST)
+    output:
+        "data/unweighted_network/{distance}k/ugrn.csv"
+    shell:
+        "python src/python/aggregate_target_sets.py {input} {output}"
+
 
 rule download_tf_chipseq_data:
     output:
