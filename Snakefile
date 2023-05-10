@@ -3,19 +3,28 @@
 include: "uterine.smk"
 
 with open("assets/factors.txt", "r") as f:
-    lines = [line.strip() for line in f]
-    TF_LIST = [line.split(",")[0] for line in lines][:3]
+    TF_LIST = [line.strip() for line in f]
+    TF_LIST = TF_LIST[:3]
 
 # Define the target rule
 rule all:
     input:
-        expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
-        expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L"))
+        # expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
+        # expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L"))
+        expand("data/target_sets/{distance}k/{tf}.tsv", distance=(1, 5, 10), tf=TF_LIST)
 
 rule compile_cpp:
     input: "src/cpp/peak_rp.cpp"
     output: "src/cpp/peak_rp"
     shell: "g++ -o {output} {input} -O3 -std=c++17 -pthread"
+
+rule download_target_sets:
+    output:
+        "data/target_sets/{distance}k/{tf}.tsv"
+    params: 
+        url="https://chip-atlas.dbcls.jp/data/hg19/target/{tf}.{distance}.tsv"
+    shell:
+        "wget -O {output} {params.url}"
 
 rule download_tf_chipseq_data:
     output:

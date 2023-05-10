@@ -31,8 +31,11 @@ result = result.reset_index(drop=True)
 # Set the index as the "Gene" column
 result = result.set_index("Gene")
 
+# Remove index name
+result = result.rename_axis(None)
+
 # Sort columns alphabetically
 result = result.sort_index(axis=1)
 
 # Save the aggregated DataFrame to a new CSV file
-result.to_csv(output_file, index=False)
+result.to_csv(output_file)
