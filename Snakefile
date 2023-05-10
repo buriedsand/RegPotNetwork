@@ -20,12 +20,11 @@ rule compile_cpp:
 
 rule download_target_sets:
     output:
-        file="data/target_sets/{distance}k/{tf}.tsv",
-        log=temp("data/target_sets/{distance}k/{tf}.log")
+        "data/target_sets/{distance}k/{tf}.tsv"
     params: 
         url="https://chip-atlas.dbcls.jp/data/hg19/target/{tf}.{distance}.tsv"
     shell:
-        "wget -O {output.file} {params.url} -o {output.log} || touch {output.file}"
+        "wget -O {output} {params.url} || touch {output.file}"
 
 rule download_tf_chipseq_data:
     output:
