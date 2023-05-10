@@ -24,7 +24,7 @@ rule download_target_sets:
     params: 
         url="https://chip-atlas.dbcls.jp/data/hg19/target/{tf}.{distance}.tsv"
     shell:
-        "wget -O {output} {params.url} || touch {output.file}"
+        "wget -O {output} {params.url} || touch {output}"
 
 rule download_tf_chipseq_data:
     output:
