@@ -10,5 +10,9 @@ inputs/
 # Mumerge
 mumerge/
 
+# Ignore
+misc/
+test.py
+
 # Compiled files
 src/cpp/peak_rp

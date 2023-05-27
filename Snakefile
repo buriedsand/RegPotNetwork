@@ -9,9 +9,10 @@ with open("assets/factors.txt", "r") as f:
 # Define the target rule
 rule all:
     input:
-        # expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
-        # expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L"))
-        expand("data/unweighted_network/{distance}k/ugrn.csv", distance=(1, 5, 10))
+        expand("data/tmp/outputs/{group}/peak_rp.csv", group=("M", "L")),
+        expand("data/tmp/outputs/{group}/chrom_rp.csv", group=("M", "L")),
+        # expand("data/unweighted_network/{distance}k/ugrn.csv", distance=(1, 5, 10))
+        expand("data/unweighted_network/{distance}k/ugrn.csv", distance=(5,))
 
 rule compile_cpp:
     input: "src/cpp/peak_rp.cpp"
